@@ -16,7 +16,7 @@ Our experimental results show that for the same experimental setting, the state-
 - `CPU` contains codes of MapEmbed and the related algorithms implemented on CPU platforms:
   - `MapEmbed`: Source codes for MapEmbed Hashing 
   - `ComparedAlgorithms`: Source codes for the related algorithms, including Dynamic Perfect Hashing and Static Perfect Hashing (CMPH)
-- `FPGA` contains codes of MapEmbed implemented on FPGA platforms:
+- `FPGA` contains codes of MapEmbed implemented on FPGA platforms.
 - more details can be found in the folders.
 
 
