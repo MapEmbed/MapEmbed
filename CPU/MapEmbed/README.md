@@ -18,8 +18,8 @@ Suppose you've already cloned the repository and start from the 'MapEmbed' direc
 
 You just need:
 
-	& make
-	& ./MapEmbed
+	$ make
+	$ ./MapEmbed
 
 
 ## Output format

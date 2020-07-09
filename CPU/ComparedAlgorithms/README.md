@@ -9,7 +9,7 @@ Martin Dietzfelbinger et. al, Dynamic Perfect Hashing: Upper and Lower Bounds(DP
 
 ## Static Perfect Hashing
 
-- `./cmph-master`: The CMPH Library encapsulates the newest and more efficient algorithms in an easy-to-use, production-quality, fast API. Our experiments are conducted using the CMPH Library.
+- `cmph-master`: The CMPH Library encapsulates the newest and more efficient algorithms in an easy-to-use, production-quality, fast API. Our experiments are conducted using the CMPH Library.
 
 - `cmph.c`: An example to run CMPH. We compare MapEmbed Hashing with four Minimal Perfect Hashing schemes (BMZ, CMH, BDZ, and CHD) and two Perfect Hashing schemes (BDZ\_PH and CHD\_PH) in CMPH library. 
 

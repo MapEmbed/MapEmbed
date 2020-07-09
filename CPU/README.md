@@ -4,8 +4,8 @@
 
 ## File Structure
 
-- `MapEmbed`: The C++ source code for MapEmbed Hashing
-- `ComparedAlgorithms`: The source code for the related algorithms, including Dynamic Perfect Hashing and Static Perfect Hashing (CMPH)
+- `MapEmbed`: The C++ source codes for MapEmbed Hashing
+- `ComparedAlgorithms`: The source codes for the related algorithms, including Dynamic Perfect Hashing and Static Perfect Hashing (CMPH)
 
 
 
@@ -16,7 +16,7 @@
 
 ## About the dataset 
 
-The data we use here are randomly generated KV pairs. We randomly generate 8M KV pairs. The key and the value fields of each KV pair are both 8B strings generated from a uniform distribution. 
+The data we use here are randomly generated KV pairs. We randomly generate 8M KV pairs. The key and the value fields of each KV pair are both 8-Bytes strings generated from a uniform distribution. 
 If you want to use CAIDA datasets, please register in [CAIDA](http://www.caida.org/home/) first and then apply for the traces.
 
 
