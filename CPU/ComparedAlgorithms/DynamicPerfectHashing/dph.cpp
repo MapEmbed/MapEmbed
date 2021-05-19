@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
     }
     clock_gettime(CLOCK_MONOTONIC, &time2);
     resns = (long long)(time2.tv_sec - time1.tv_sec) * 1000000000LL + (time2.tv_nsec - time1.tv_nsec);
-    double insert_mips = (double)1000.0 * t / resns;
+    double insert_mops = (double)1000.0 * t / resns;
     
     /* ******************** query *********************** */
     fails = 0;
@@ -40,13 +40,13 @@ int main(int argc, char* argv[]){
     }
     clock_gettime(CLOCK_MONOTONIC, &time2);
     resns = (long long)(time2.tv_sec - time1.tv_sec) * 1000000000LL + (time2.tv_nsec - time1.tv_nsec);
-    double query_mips = (double)1000.0 * t / resns;
+    double query_mops = (double)1000.0 * t / resns;
 
     count_fail += fails;
         
     printf("-----------Total------------\n");
-    printf("insertion speed %lf\n", insert_mips);
-    printf("query speed %lf\n", query_mips);
+    printf("insertion speed %lf\n", insert_mops);
+    printf("query speed %lf\n", query_mops);
     printf("fails: %d\n", count_fail);
     printf("load factor: %lf\n", (double)t/Hash.current_slots());
     printf("memory usage: %lf KB\n", (double)Hash.memory_usage()/1000);
