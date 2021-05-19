@@ -33,7 +33,7 @@ inline void random_string(char* str, int len){
 }
 
 void create_random_kvs(KV_entry *kvs, int num){
-    srand((uint)time(0));
+    srand((uint32_t)time(0));
     for(int i = 0; i < num; ++i){
         random_string(kvs[i].key, KEY_LEN);
         random_string(kvs[i].value, VAL_LEN);
@@ -84,7 +84,7 @@ public:
 #else
     Bucket *bucket;
 #endif
-    uint **cell;
+    uint32_t **cell;
     
     uint32_t seed_hash_to_cell[MAX_LAYER];
     uint32_t seed_hash_to_bucket[M];
@@ -97,15 +97,13 @@ public:
 private:
     void initialize_hash_functions(){
         std::set<int> seeds;
-        uint seed = rand()%MAX_PRIME32;
+        uint32_t seed = rand()%MAX_PRIME32;
         seed_hash_to_guide = seed;
-//        hash_to_guide.initialize(seed);
         seeds.insert(seed);
         for(int i = 0; i < cell_layer; ++i){
             seed = rand()%MAX_PRIME32;
             while(seeds.find(seed) != seeds.end())
                 seed = rand()%MAX_PRIME32;
-//            hash_to_cell[i].initialize(seed);
             seed_hash_to_cell[i] = seed;
             seeds.insert(seed);
         }
@@ -113,7 +111,6 @@ private:
             seed = rand()%MAX_PRIME32;
             while(seeds.find(seed) != seeds.end())
                 seed = rand()%MAX_PRIME32;
-//            hash_to_bucket[i].initialize(seed);
             seed_hash_to_bucket[i] = seed;
             seeds.insert(seed);
         }
@@ -122,13 +119,11 @@ private:
 
     int calculate_cell(const char* key, int layer){
         // cost: calculate 1 hash
-//        return hash_to_cell[layer].run(key, KEY_LEN*sizeof(char)) % cell_number[layer];
         return MurmurHash3_x86_32(key, KEY_LEN, seed_hash_to_cell[layer]) % cell_number[layer];
     }
 
     int calculate_guide(const char* key, int cell_value){
         // cost: calculate 1 hash
-//        uint32_t tmp = hash_to_guide.run(key, KEY_LEN*sizeof(char));
         uint32_t tmp = MurmurHash3_x86_32(key, KEY_LEN, seed_hash_to_guide);
         int ret = ((tmp & (cell_hash - 1)) + cell_value) % cell_hash;
         return ret;
@@ -139,7 +134,6 @@ private:
         int guide = calculate_guide(key, cell[layer][k]);
         int cell_ID = k + cell_offset[layer];
         int page_size = bucket_number / cell_hash;
-//        int ret = hash_to_bucket[guide].run((const char*)&cell_ID, sizeof(int)) % page_size + guide * page_size;
         int ret = MurmurHash3_x86_32((const char*)&cell_ID, sizeof(int), seed_hash_to_bucket[guide]) % page_size + guide * page_size;
         return ret;
     }
@@ -147,7 +141,6 @@ private:
     int calculate_bucket_from_cell(int layer, int guide, int cell_ID){
         // cost: calculate 1 hash
         int page_size = bucket_number / cell_hash;
-//        int ret = hash_to_bucket[guide].run((const char*)&cell_ID, sizeof(int)) % page_size + guide * page_size;
         int ret = MurmurHash3_x86_32((const char*)&cell_ID, sizeof(int), seed_hash_to_bucket[guide]) % page_size + guide * page_size;
         return ret;
     }
@@ -301,11 +294,9 @@ private:
     }
 
     void check_bucket(int d){
-        // assert(bucket[d].check == false);
         int used = bucket[d].used;
         for(int i = 0; i < used; ++i){
             int dd = query_bucket(bucket[d].key[i]);
-            // assert(dd != -1);
             if(dd != d){
                 used--;
                 memcpy(bucket[d].key[i], bucket[d].key[used], KEY_LEN);
@@ -335,10 +326,10 @@ public:
         cell_hash = pow(2, cell_bit);
         cell_full = cell_hash - 1;
 
-        cell = new uint* [cell_layer];
+        cell = new uint32_t* [cell_layer];
         for(int i = 0; i < cell_layer; ++i){
-            cell[i] = new uint[cell_number[i] + 10];
-            memset(cell[i], 0, (cell_number[i]+10)*sizeof(uint));
+            cell[i] = new uint32_t[cell_number[i] + 10];
+            memset(cell[i], 0, (cell_number[i]+10)*sizeof(uint32_t));
         }
         cell_offset[0] = 0;
         for(int i = 1; i < cell_layer; ++i)
