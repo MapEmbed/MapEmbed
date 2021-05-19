@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "BOBHash32.h"
+#include "murmur3.h"
 
 
 // ******************  debug ********************
@@ -20,9 +20,9 @@ bool globalflag = 0;
 int debugcount = 0;
 
 // ******************  begin kv pair ********************
-#define KEY_LEN 8
-#define VAL_LEN 8
-#define KV_NUM 400000
+#define KEY_LEN 4
+#define VAL_LEN 4
+#define KV_NUM 6000000
 
 struct KV_entry{
     char key[KEY_LEN];
@@ -80,18 +80,16 @@ struct Bucket{
     uint32_t length;    // mj
     uint32_t number;    // bj
     uint32_t space;     // sj
-    BOBHash32 t2e;
-
+    uint32_t seed_t2e;
+    
     Bucket(){
-        uint32_t seed = rand() % MAX_PRIME32;
-        t2e.initialize(seed);
+        seed_t2e = rand() % MAX_PRIME32;
     }
     int table_to_element(const char* key){
-        return t2e.run(key, KEY_LEN*sizeof(char)) % space;
+        return MurmurHash3_x86_32(key, KEY_LEN, seed_t2e) % space;
     }
     void reset_hash(){
-        uint32_t seed = rand() % MAX_PRIME32;
-        t2e.initialize(seed);
+        seed_t2e = rand() % MAX_PRIME32;
     }
 };
 
@@ -139,24 +137,22 @@ list * new_list;        //I have to declare the lists to store the elements temp
 struct HashTable{
     Bucket *sub_table;
     uint32_t size;//s(M)
-    BOBHash32 h2t;
+    uint32_t seed_h2t;
 
     HashTable(){
-        uint32_t seed = rand() % MAX_PRIME32;
-        h2t.initialize(seed);
+        seed_h2t = rand() % MAX_PRIME32;
     }
     int hash_to_table(const char* key){
-        return h2t.run(key, KEY_LEN*sizeof(char)) % size;
+        return MurmurHash3_x86_32(key, KEY_LEN, seed_h2t) % size;
     } 
     void reset_hash(){
-        uint32_t seed = rand() % MAX_PRIME32;
-        h2t.initialize(seed);        
+        seed_h2t = rand() % MAX_PRIME32;
     }
 
     //Insert the key into the main hash table, Hash.
     Status Insert(KV_entry& kv){
-        if(globalflag)
-            debugcount++;
+//        if(globalflag)
+//            debugcount++;
 
         cnt = cnt + 1;
         if (cnt > M){
@@ -273,7 +269,7 @@ struct HashTable{
                     else
                         sub_table[bucket_number].length = 2;
                     sub_table[bucket_number].space = 2 * sub_table[bucket_number].length * \
-                    (sub_table[bucket_number].length - 1);
+                        (sub_table[bucket_number].length - 1);
                     
                     //If condition ** is still satisfied, rehash the sub-hashtable
                     if (isSatisfied()) {
@@ -379,9 +375,11 @@ struct HashTable{
         
         new_list = (list *)malloc((s(M)) * sizeof(list));
         int flag = 1, m = 1;
-        nodep node_pointer[s(M)];
 
-        //Randomly choose level-1 hash function until the condition ** is satisfied.
+        // nodep node_pointer[s(M)];
+        nodep* node_pointer= (nodep *)malloc((s(M)) * sizeof(nodep));
+
+        //Randomly choose level-1 hash until the condition ** is satisfied.
         while (flag){
             for(i = 0; i < s(M); i++){
                 new_list[i].number = 0;
@@ -430,11 +428,11 @@ struct HashTable{
                 flag = 0;
             }
         }
-
+        
+        
         if(globalflag)
             hashcount += size;
 
-        
 
         //Form every sub-hashtable
         for (i = 0; i < size; i++){
@@ -446,6 +444,8 @@ struct HashTable{
             
             //Randomly choose hash function, until  it is injective on sub-hashtable, that is no collision
             while (flag) {
+                
+            //    printf("debugcount %d\n", ++debugcount);
                 sub_table[i].reset_hash();
                 pointer = (new_list[i].head->next);
                 
@@ -456,6 +456,7 @@ struct HashTable{
                     new_location = sub_table[i].table_to_element(pointer->element.key);
                     if (sub_table[i].element[new_location] != DELETED) {
                         collision = COLLISION;
+//                        printf("list length: %d, subtable length: %d\n", new_list[i].number, sub_table[i].space);
                         break;
                     }
                     sub_table[i].element[new_location] = pointer -> element;
@@ -470,7 +471,10 @@ struct HashTable{
                         sub_table[i].element[k] = DELETED;
                 }
             }
+//            printf("ttt\n");
         }
+//        printf("abc\n");
+        free(node_pointer);
         return SUCCESS;
     }
 
@@ -518,7 +522,7 @@ struct HashTable{
     //Check if condition ** is satisfied
     Status isSatisfied(){
         uint32_t i, sum = 0;
-        uint32_t threshold = 32 * M * M / size + 4 * M;
+        uint32_t threshold = 32ull * M * M / size + 4 * M;
         
         for (i = 0; i < size; i++) {
             sum += sub_table[i].space;
@@ -527,7 +531,6 @@ struct HashTable{
                 return UNSUCCESS;
             }
         }
-        
         return SUCCESS;
     }
 
@@ -537,6 +540,15 @@ struct HashTable{
             cnt += sub_table[i].space;
         return cnt;
     }
+
+    int memory_usage(){
+        int ret = 0;
+        for(int i = 0; i < size; ++i)
+            ret += sub_table[i].space * (KEY_LEN + VAL_LEN);
+        ret += size* sizeof(Bucket);
+        return ret;
+    }
+
 }Hash;
 
 

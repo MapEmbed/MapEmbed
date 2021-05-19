@@ -15,4 +15,4 @@ Martin Dietzfelbinger et. al, Dynamic Perfect Hashing: Upper and Lower Bounds(DP
 
 ## Dependency
 
-These codes are based on `./BOBHash32.h`. The codes for Static Perfect Hashing are depended on CAIDA datasets. If you want to use CAIDA datasets, please register in [CAIDA](http://www.caida.org/home/) first and then apply for the traces.
+These codes are based on `./murmur3.h`. The codes for Static Perfect Hashing are depended on CAIDA datasets. If you want to use CAIDA datasets, please register in [CAIDA](http://www.caida.org/home/) first and then apply for the traces.
