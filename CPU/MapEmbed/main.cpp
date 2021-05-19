@@ -118,13 +118,15 @@ int basic_test(){
     int testcycles = 10;
 /******************************* create MapEmbed ********************************/
     int layer = 3;
-    int bucket_number = 500000 /32*32;
+    int bucket_number = 500000;
+    printf("%d\n", bucket_number*sizeof(Bucket));
     int cell_number[3];
-    cell_number[0] = 1800000;
-    cell_number[1] = 600000;
-    cell_number[2] = 200000;
+    cell_number[0] = 2250000;
+    cell_number[1] = 750000;
+    cell_number[2] = 250000;
     int cell_bit = 4;
     
+    printf("%lf\n", (cell_number[2]*13)*0.5);
     MapEmbed mapembed(layer, bucket_number, cell_number, cell_bit);
     timespec time1, time2;
     long long resns = 0;
@@ -143,7 +145,7 @@ int basic_test(){
         clock_gettime(CLOCK_MONOTONIC, &time1); 
         for(p = 0; p < KV_NUM; ++p){
             if(mapembed.insert(kvPairs[p]) == false)
-                if(++fails >= 10)
+                if(++fails >= 8)
                     break;
         }
         clock_gettime(CLOCK_MONOTONIC, &time2); 
@@ -154,7 +156,7 @@ int basic_test(){
 
     for(p = 0; p < KV_NUM; ++p){
         if(mapembed.insert(kvPairs[p]) == false)
-            if(++fails >= 10)
+            if(++fails >= 8)
                 break;
     }
 
@@ -187,7 +189,7 @@ int basic_test(){
     clock_gettime(CLOCK_MONOTONIC, &time1); 
     for(; p < KV_NUM; ++p){
         if(mapembed.insert(kvPairs[p]) == false){
-            if(++fails >= 10)
+            if(++fails >= 8)
                 break;
         }
         else icnt++;
@@ -286,14 +288,14 @@ void bucket_number_test(int workload, int bn = 160){
 
 int main(){
     create_random_kvs_keyint(kvPairs, KV_NUM);
-    // basic_test();
+    basic_test();
     // fast_slow_test(50000*32*32); 
     // for(int i = 100000; i <= 1000000; i += 100000)
     //     memory_usage_test(i);
-    int bn = 1024;
-    while(bn <= 16384){
-        bucket_number_test(1100000, bn);
-        bn *= 2;
-    }
+    // int bn = 1024;
+    // while(bn <= 16384){
+    //     bucket_number_test(1100000, bn);
+    //     bn *= 2;
+    // }
     return 0;
 }
